@@ -1,0 +1,11 @@
+This repository includes configuration files and step by step guidelines on how to setup a prometheus - grafana - alertmanager monitoring and alerting system for a flask web app, deployed on an ec2 Instance.
+
+High Level Steps
+1. For flask app deployment to ec2 instance, you can check my other repo: https://github.com/EngineerMarion29/deploy_flask_to_aws_ec2
+2. Create new ec2 instance that will house prometheus, grafana and alertmanager services.
+3. Install node exporter to the instances that you would like to have monitoring.
+4. Open ports 9090, 9100, 9093, 3000 for the prometheus, grafana and alertmanager services.
+5. Install prometheus, grafana and alertmanager services.
+6. Set alerting rules to be used by alertmanager 
+7. Edit prometheus.yml to ensure prometheus will send the necessary alert rules to alertmanager
+8. Create a yml config file that will contain information to which stream will the alert be sent to.
