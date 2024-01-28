@@ -1,4 +1,4 @@
-This is a repo that will contain steps and configuration files about a monitoring, and alerting system implementation for a flask app on an ec2 instance.
+**This is a repo that will contain steps and configuration files about a monitoring, and alerting system implementation for a flask app on an ec2 instance.**
 
 -Prometheus and node exporter are used for data metrics/logs gathering 
 
