@@ -1,6 +1,6 @@
 
 1. Install prometheus via wget
-wget  https://github.com/prometheus/prometheus/releases/download/v2.23.0/prometheus-2.23.0.linux-amd64.tar.gz
+wget https://github.com/prometheus/prometheus/releases/download/v2.23.0/prometheus-2.23.0.linux-amd64.tar.gz
 
 2. Untar the package
 tar -xvf prometheus-2.23.0.linux-amd64.tar.gz
@@ -13,7 +13,7 @@ cp prometheus-2.23.0.linux-amd64/promtool /usr/local/bin
 mkdir -p /etc/prometheus
 cp -r prometheus-2.23.0.linux-amd64/consoles /etc/prometheus/
 cp -r prometheus-2.23.0.linux-amd64/console_libraries /etc/prometheus
-cp prometheus-2.23.0.linux-amd64/promtool /usr/local/bin/
+
 
 5. Configure prometheus.yml
 global:
