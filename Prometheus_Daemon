@@ -1,5 +1,5 @@
 
-1. Install prometheus via wget
+1. Download prometheus package via wget
 wget https://github.com/prometheus/prometheus/releases/download/v2.23.0/prometheus-2.23.0.linux-amd64.tar.gz
 
 2. Untar the package
