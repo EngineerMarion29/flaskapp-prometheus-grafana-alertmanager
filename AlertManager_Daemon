@@ -1,0 +1,121 @@
+
+1. Download the AlertManager Package
+wget https://github.com/prometheus/alertmanager/releases/download/v0.25.0/alertmanager-0.25.0.linux-amd64.tar.gz
+
+2. Untar the package
+tar -xvf alertmanager-0.25.0.linux-amd64.tar.gz
+
+3. Create an alertmanager user
+useradd alertmanager --no-create-home --shell /bin/false 
+
+4. Create necessary dir
+mkdir -p /etc/alertmanager/templates
+mkdir /var/lib/alertmanager
+
+5. Change ownership of the dirs on #4, to alertmanager user and group
+chown alertmanager:alertmanager /etc/alertmanager
+chown alertmanager:alertmanager /var/lib/alertmanager
+
+6. Copy the necessary scripts to bin dir
+cp alertmanager/alertmanager /usr/local/bin
+cp alertmanager/amtool /usr/local/bin
+
+7. Ensure change ownership of the script on bin dir
+chown alertmanager:alertmanager /usr/local/bin/alertmanager
+chown alertmanager:alertmanager /usr/local/bin/amtool
+
+8. Configure service file
+vi /etc/systemd/system/alertmanager.service
+[Unit]
+Description=AlertManager
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=alertmanager
+Group=alertmanager
+Type=simple
+ExecStart=/usr/bin/alertmanager \
+    --config.file /etc/alertmanager/alertmanager.yml \
+    --cluster.advertise-address  0.0.0.0:9093 \
+    --storage.path /var/lib/alertmanager/
+
+[Install]
+WantedBy=multi-user.target
+
+#Systemctl start, enable and status for alertmanager.service
+
+9. Configure AlertManager yml file
+vi /etc/alertmanager/alertmanager.yml
+global:
+ resolve_timeout: 1m
+ smtp_smarthost: 'smtp.gmail.com:587'
+ smtp_from: '<email addr sender>'
+ smtp_auth_username: '<email addr sender>'
+ smtp_auth_password: '<password>'
+ smtp_require_tls: true
+
+templates:
+- '/etc/alertmanager/template/*.tmpl'
+
+route:
+  group_by: ['alertname']
+  group_wait: 30s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'email-notifications'
+
+receivers:
+- name: 'email-notifications'
+  email_configs:
+  - to: 'email recipient/s'
+    from: '<email sender>'
+    smarthost: 'smtp.gmail.com:587'
+    auth_username: '<email sender>'
+    auth_identity: '<email sender>'
+    auth_password: '<password>'
+    send_resolved: true
+    require_tls: true
+
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'instance']
+
+10. Configure /etc/prometheus/alerting.rules.yml
+vi /etc/prometheus/alerting.rules.yml
+groups:
+- name: ServerDown
+  rules:
+  # Alert for any instance that is unreachable for >1 minute.
+  - alert: ServerDown
+    expr: up == 0
+    for: 1m
+    labels:
+      severity: page
+    annotations:
+      summary: "Server {{ $labels.instance }} down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute."
+
+11. Edit /etc/prometheus.yml to contain alerting rules
+vi /etc/prometheus.yml
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+      - targets: ['localhost:9100']
+      - targets: ['172.31.37.11:9100']
+
+rule_files:
+  - 'alerting.rules.yml'
+
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      - localhost:9093
