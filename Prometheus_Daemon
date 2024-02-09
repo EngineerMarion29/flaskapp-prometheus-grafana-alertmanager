@@ -1,0 +1,65 @@
+
+1. Install prometheus via wget
+wget  https://github.com/prometheus/prometheus/releases/download/v2.23.0/prometheus-2.23.0.linux-amd64.tar.gz
+
+2. Untar the package
+tar -xvf prometheus-2.23.0.linux-amd64.tar.gz
+
+3. Copy the scripts to /usr/local/bin
+sudo cp prometheus-2.23.0.linux-amd64/prometheus /usr/local/bin
+cp prometheus-2.23.0.linux-amd64/promtool /usr/local/bin
+
+4. Create a prometheus directory in /etc and copy the following dir to the newly created one
+mkdir -p /etc/prometheus
+sudo cp -r prometheus-2.23.0.linux-amd64/consoles /etc/prometheus/
+sudo cp -r prometheus-2.23.0.linux-amd64/console_libraries /etc/prometheus
+sudo cp prometheus-2.23.0.linux-amd64/promtool /usr/local/bin/
+
+5. Configure prometheus.yml
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+      - targets: ['localhost:9100']
+      - targets: ['172.31.36.24:9100']
+
+6. Create a user representing the prometheus service and create /var/lib/prometheus dir
+sudo useradd prometheus --no-create-home prometheus
+sudo mkdir /var/lib/prometheus
+
+7. Create a prometheus service file
+vi /etc/systemd/system/prometheus.service
+[Unit]
+Description=Prometheus Daemon
+Wants=network-online.target
+After=network-online.target
+[Service]
+User=prometheus
+Group=prometheus
+Type=simple
+ExecStart=/usr/local/bin/prometheus \
+    --config.file /etc/prometheus/prometheus.yml \
+    --storage.tsdb.path /var/lib/prometheus/ \
+    --web.console.templates=/etc/prometheus/consoles \
+    --web.console.libraries=/etc/prometheus/console_libraries
+[Install]
+WantedBy=multi-user.target
+
+8. Modify the necessary directory and files to be owned by prometheus
+
+sudo chown prometheus:prometheus /etc/prometheus
+sudo chown prometheus:prometheus /usr/local/bin/prometheus
+sudo chown prometheus:prometheus /usr/local/bin/promtool
+sudo chown -R prometheus:prometheus /etc/prometheus/consoles
+sudo chown -R prometheus:prometheus /etc/prometheus/console_libraries
+sudo chown -R prometheus:prometheus /var/lib/prometheus
+
+9. Reload System daemon
+sudo systemctl daemon-reload
+
+10. Start and enable prometheus service
+sudo systemctl start prometheus
+sudo systemctl enable prometheus
