@@ -27,7 +27,7 @@ scrape_configs:
       - targets: ['172.31.36.24:9100']
 
 6. Create a user representing the prometheus service and create /var/lib/prometheus dir
-sudo useradd prometheus --no-create-home prometheus
+sudo useradd prometheus --no-create-home --shell /bin/false
 sudo mkdir /var/lib/prometheus
 
 7. Create a prometheus service file
