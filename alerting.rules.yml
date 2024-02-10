@@ -29,3 +29,15 @@ groups:
     annotations:
       summary: "Server {{ $labels.instance }} down"
       description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute."
+
+- name: HighCPUUsage
+  rules:
+    - alert: HighCPUUsage
+      expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > .1
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High CPU Usage on {{ $labels.instance }}"
+        description: "CPU utilization on {{ $labels.instance }} of job {{ $labels.job }} has exceeded 70% for more than 1 minute."
+
